@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import {
   BadRequestException,
   Injectable,
@@ -5,21 +6,14 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateUserDTO } from '../user/dto/create-user.dto';
-import { UserService } from '../user/user.service';
-import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { LoginDTO } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { SendOtpDTO } from './dto/send-email.dto';
-import { OTPRepository } from 'src/DB/repositories/otp.repository';
 import * as randomstring from 'randomstring';
-import { compareHash } from 'src/common/security/hash.utils';
-import { NotFoundError } from 'rxjs';
-import { TokenRepository } from 'src/DB/repositories/token.repository';
-import { ForgetPasswordDTO } from './dto/forget-password.dto';
-import { ResetPasswordDTO } from './dto/reset-password.dto';
-import { compare } from 'bcrypt';
+import { UserService } from '../user/user.service';
+import { OTPRepository, TokenRepository } from 'src/DB/repositories';
+import { ForgetPasswordDTO, LoginDTO, ResetPasswordDTO, SendOtpDTO } from './dto';
+import { CreateUserDTO } from '../user/dto';
+import { compareHash } from 'src/common/security';
 
 @Injectable()
 export class AuthService {
