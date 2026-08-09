@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDTO } from '../user/dto/create-user.dto';
 import { UserService } from '../user/user.service';
@@ -15,6 +16,10 @@ import { OTPRepository } from 'src/DB/repositories/otp.repository';
 import * as randomstring from 'randomstring';
 import { compareHash } from 'src/common/security/hash.utils';
 import { NotFoundError } from 'rxjs';
+import { TokenRepository } from 'src/DB/repositories/token.repository';
+import { ForgetPasswordDTO } from './dto/forget-password.dto';
+import { ResetPasswordDTO } from './dto/reset-password.dto';
+import { compare } from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +29,7 @@ export class AuthService {
     private readonly _ConfigService: ConfigService,
     private readonly _JwtService: JwtService,
     private readonly _OTPRepository: OTPRepository,
+    private readonly _TokenRepository: TokenRepository,
   ) {}
   async register(data: CreateUserDTO) {
     try {
@@ -34,7 +40,10 @@ export class AuthService {
         throw new NotFoundException("OTP Doesn't Match!");
       await otpExist.deleteOne();
 
-      const user = await this._UserService.create(data);
+      const user = await this._UserService.create({
+        ...data,
+        accountActivated: true,
+      });
       return { success: true, message: 'done', user };
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -63,6 +72,13 @@ export class AuthService {
         expiresIn: this._ConfigService.get('REFRESH_EXPIRE_IN'),
       },
     );
+
+    await this._TokenRepository.create({ user: user._id, token: access_token });
+    await this._TokenRepository.create({
+      user: user._id,
+      token: refresh_token,
+    });
+
     return {
       success: true,
       message: 'login successfully',
@@ -93,6 +109,70 @@ export class AuthService {
       // save in db
       await this._OTPRepository.create({ email, otp: newOtp });
       return { success: true, message: 'Check your Email!' };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async forgetPassword(data: ForgetPasswordDTO) {
+    try {
+      const { email } = data;
+
+      const user = await this._UserService.userExistByEmail(email);
+      if (!user)
+        throw new UnauthorizedException('This Email not linked to account!');
+
+      if (!user.accountActivated)
+        throw new BadRequestException('This account is not activated yet!');
+
+      // this because if user  click on the send otp more than one time, the last one is the only valid one
+      const otp = await this._OTPRepository.findOne({ filter: { email } });
+      if (otp) await otp.deleteOne();
+
+      const newOtp = randomstring.generate(6);
+
+      this._MailerService.sendMail({
+        to: email,
+        subject: 'Reset Password',
+        text: `Yout OTP is: ${newOtp}`,
+      });
+      await this._OTPRepository.create({ email, otp: newOtp });
+
+      return { success: true, message: 'Check your Email!' };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async resetPassword(data: ResetPasswordDTO) {
+    try {
+      const { email, password, otp } = data;
+
+      const user = await this._UserService.userExistByEmail(email);
+      if (!user)
+        throw new UnauthorizedException('This Email not linked to account!');
+
+      if (!user.accountActivated)
+        throw new BadRequestException('This account is not activated yet!');
+
+      const otpDoc = await this._OTPRepository.findOne({ filter: { email } });
+      if (!otpDoc || !compareHash(otp, otpDoc.otp))
+        throw new UnauthorizedException('Invalid OTP!');
+
+      user.password = password;
+      await user.save();
+
+      const oldUserTokens = await this._TokenRepository.findAll({
+        filter: { user: user._id },
+      });
+
+      if (oldUserTokens.data.length) {
+        for (const token of oldUserTokens.data) {
+          token.isValid = false;
+          await token.save();
+        }
+      }
+      return { success: true, message: 'Passwrod reset successfully!' };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

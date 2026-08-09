@@ -10,8 +10,8 @@ export type findOneArgs<TDocument> = {
 };
 
 export type findAllArgs<TDocument> = findOneArgs<TDocument> & {
-  paginate: Ipaginate;
-  sort: any;
+  paginate?: Ipaginate;
+  sort?: any;
 };
 
 export type updateArgs<TDocument> = {
