@@ -28,6 +28,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
               pass: configService.get('PASS'),
             },
           },
+          from: configService.get("EMAIL")
         };
       },
     }),
