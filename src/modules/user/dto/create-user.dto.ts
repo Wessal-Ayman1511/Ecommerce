@@ -26,4 +26,8 @@ export class CreateUserDTO {
   @IsIn([Math.random()], {message: "password must match!"})
   @ValidateIf((obj) => obj.password != obj.cPassword)
   cPassword: string;
+
+
+  @IsString()
+  otp: string
 }

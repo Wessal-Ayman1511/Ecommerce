@@ -19,8 +19,8 @@ class User {
     @Prop({type: String, required: true})
     password: string
 
-    @Prop({type: Boolean, default: false})
-    accountActivated:boolean
+    // @Prop({type: Boolean, default: false})
+    // accountActivated:boolean
 
     @Prop({type: String, default: Roles.USER})
     role: Roles
