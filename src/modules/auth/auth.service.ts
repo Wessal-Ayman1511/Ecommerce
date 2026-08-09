@@ -1,32 +1,30 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { CreateUserDTO } from '../user/dto/create-user.dto';
 import { UserService } from '../user/user.service';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly _UserService: UserService){}
-  register(data: CreateUserDTO) {
+  constructor(
+    private readonly _UserService: UserService,
+    private readonly _MailerService: MailerService,
+    private readonly _ConfigService: ConfigService,
+  ) {}
+  async register(data: CreateUserDTO) {
+    try {
+      const { email } = data;
+      this._MailerService.sendMail({
+        from: this._ConfigService.get('EMAIL'),
+        to: email,
+        subject: 'Account Activation',
+        text: 'Activate your account',
+      });
 
-     return this._UserService.create(data)
-    
-
-  }
-
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+      const user = await this._UserService.create(data);
+      return { success: true, message: 'done', user };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 }
