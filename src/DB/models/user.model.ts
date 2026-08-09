@@ -3,6 +3,7 @@
 import { MongooseModule, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Roles } from "../enums/user.enum";
 import { HydratedDocument } from "mongoose";
+import { hash } from "src/common/security/hash.utils";
 
 @Schema({timestamps: true})
 class User {
@@ -32,8 +33,19 @@ class User {
 export const UserSchema = SchemaFactory.createForClass(User)
 
 
+// hook
+UserSchema.pre('save', function (next) {
+    if(this.isModified("password")){
+        this.password = hash(this.password)
+    }
+
+
+})
+
+// model name
+export const userModelName = User.name
 /// model
-export const UserModel = MongooseModule.forFeature([{name: User.name, schema: UserSchema}])
+export const UserModel = MongooseModule.forFeature([{name: userModelName, schema: UserSchema}])
 
 
 // user type

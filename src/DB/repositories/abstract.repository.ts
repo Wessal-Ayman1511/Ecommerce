@@ -21,7 +21,7 @@ export type updateArgs<TDocument> = {
   populate?: any;
 };
 
-abstract class AbstractRepository<TDocument> {
+export abstract class AbstractRepository<TDocument> {
   protected constructor(private readonly model: Model<TDocument>) {}
 
   async findOne({
@@ -52,7 +52,7 @@ abstract class AbstractRepository<TDocument> {
   }
 
   async create(doc: Partial<TDocument>): Promise<TDocument> {
-    return this.model.create(doc);
+    return  this.model.create(doc);
   }
 
   async update({

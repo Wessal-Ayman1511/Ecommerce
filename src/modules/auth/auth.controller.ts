@@ -1,15 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { CreateUserDTO } from '../user/dto/create-user.dto';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 
-@Controller('auth')
+@Controller('auth/')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly _MailerService: MailerService,
+    private readonly _ConfigService: ConfigService
+  ) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post('/register')
+  async register(@Body() data: CreateUserDTO) {
+    const { email } = data;
+    this._MailerService.sendMail({
+      from: this._ConfigService.get("EMAIL"),
+      to:email,
+      subject: "Account Activation",
+      text: "Activate your account"
+    })
+
+    const user = await this.authService.register(data);
+    return { success: true, message: 'done', user };
   }
 
   @Get()
