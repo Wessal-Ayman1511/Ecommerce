@@ -2,7 +2,7 @@
 
 import { MongooseModule, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
-import { userModelName } from "./user.model";
+import { UserModelName } from "./user.model";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { InternalServerErrorException } from "@nestjs/common";
@@ -12,7 +12,7 @@ class Token {
     @Prop({type: String, required:true})
     token: string;
 
-    @Prop({type:Types.ObjectId, ref: userModelName, required: true})
+    @Prop({type:Types.ObjectId, ref: UserModelName, required: true})
     user: Types.ObjectId
 
     @Prop({type: Boolean, default: true})
@@ -52,12 +52,12 @@ TokenSchema.pre("save", function(){
 
 
 // model name
-export const tokenModelName = Token.name
+export const TokenModelName = Token.name
 
 
 
 /// model
-export const TokenModel = MongooseModule.forFeature([{name: tokenModelName, schema: TokenSchema}])
+export const TokenModel = MongooseModule.forFeature([{name: TokenModelName, schema: TokenSchema}])
 
 
 // Token type

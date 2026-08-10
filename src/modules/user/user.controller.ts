@@ -5,7 +5,7 @@ import { Role } from 'src/DB/enums/user.enum';
 @Controller('user')
 export class UserController {
   @Get('/profile')
-  @Roles(Role.ADMIN)
+  @Roles(Role.USER)
   getProfile() {
     return 'Done!';
   }

@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './modules/user/user.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { CategoryModule } from './modules/category/category.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
       },
     }),
     UserModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -30,11 +30,11 @@ OTPSchema.index({createdAt: 1}, {expireAfterSeconds: 120})
 
 
 // class name
-export const otpModelName = OTP.name
+export const OTPModelName = OTP.name
 
 
 // model
-export const OTPModel=  MongooseModule.forFeature([{name:otpModelName, schema:OTPSchema }])
+export const OTPModel=  MongooseModule.forFeature([{name:OTPModelName, schema:OTPSchema }])
 
 // otpDocument 
 export type OTPDocument = HydratedDocument<OTP>

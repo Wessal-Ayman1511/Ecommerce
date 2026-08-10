@@ -43,9 +43,9 @@ UserSchema.pre('save', function (next) {
 })
 
 // model name
-export const userModelName = User.name
+export const UserModelName = User.name
 /// model
-export const UserModel = MongooseModule.forFeature([{name: userModelName, schema: UserSchema}])
+export const UserModel = MongooseModule.forFeature([{name: UserModelName, schema: UserSchema}])
 
 
 // user type
