@@ -3,8 +3,9 @@ import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { RoleGuard } from 'src/common/guards';
-import { Roles } from 'src/common/decorators';
+import { Roles, User } from 'src/common/decorators';
 import { Role } from 'src/DB/enums/user.enum';
+import { Types } from 'mongoose';
 
 @Controller('category')
 export class CategoryController {
@@ -12,8 +13,9 @@ export class CategoryController {
 
   @Post()
   @Roles(Role.ADMIN)
-  create(@Body() data: CreateCategoryDto) {
+  create(@Body() data: CreateCategoryDto, @User("_id") userId: Types.ObjectId) {
     console.log(data)
+    console.log(userId)
     return this.categoryService.create(data);
   }
 
