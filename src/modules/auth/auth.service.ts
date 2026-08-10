@@ -11,7 +11,12 @@ import { JwtService } from '@nestjs/jwt';
 import * as randomstring from 'randomstring';
 import { UserService } from '../user/user.service';
 import { OTPRepository, TokenRepository } from 'src/DB/repositories';
-import { ForgetPasswordDTO, LoginDTO, ResetPasswordDTO, SendOtpDTO } from './dto';
+import {
+  ForgetPasswordDTO,
+  LoginDTO,
+  ResetPasswordDTO,
+  SendOtpDTO,
+} from './dto';
 import { CreateUserDTO } from '../user/dto';
 import { compareHash } from 'src/common/security';
 

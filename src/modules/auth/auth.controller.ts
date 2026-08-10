@@ -9,7 +9,9 @@ import { LoginDTO } from './dto/login.dto';
 import { SendOtpDTO } from './dto/send-email.dto';
 import { ForgetPasswordDTO } from './dto/forget-password.dto';
 import { ResetPasswordDTO } from './dto/reset-password.dto';
+import { Public } from 'src/common/decorators';
 
+@Public()
 @Controller('auth/')
 export class AuthController {
   constructor(private readonly _authService: AuthService) {}

@@ -1,7 +1,7 @@
 // schema claass
 
 import { MongooseModule, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Roles } from "../enums/user.enum";
+import { Role } from "../enums/user.enum";
 import { HydratedDocument } from "mongoose";
 import { hash } from "src/common/security/hash.utils";
 
@@ -22,8 +22,8 @@ class User {
     @Prop({type: Boolean, default: false})
     accountActivated:boolean
 
-    @Prop({type: String, default: Roles.USER})
-    role: Roles
+    @Prop({type: String, default: Role.USER})
+    role: Role
 
 }
 
