@@ -87,13 +87,21 @@ export class CategoryService {
     
   }
 
+  async findOne(categId: Types.ObjectId) {
+
+    const category = await this._CategoryRepository.findOne({filter: {_id: categId}})
+
+    if(!category) throw new NotFoundException("category not found!")
+
+    return {data: category}
+    
+  }
+
   findAll() {
     return `This action returns all category`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
-  }
+  
 
  
 }

@@ -12,7 +12,7 @@ import {
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Roles, User } from 'src/common/decorators';
+import { Public, Roles, User } from 'src/common/decorators';
 import { Role } from 'src/DB/enums/user.enum';
 import { Types } from 'mongoose';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -33,34 +33,40 @@ export class CategoryController {
     return this.categoryService.create(data, userId, file);
   }
 
-  @Patch(':categId')
+  @Patch(':id')
   @Roles(Role.ADMIN)
   update(
-    @Param('categId', ParseObjectIdPipe) categId: Types.ObjectId,
+    @Param('id', ParseObjectIdPipe) categId: Types.ObjectId,
     @Body() updateCategoryDto: UpdateCategoryDto,
     @User('id') userId: Types.ObjectId,
   ) {
     return this.categoryService.update(categId, updateCategoryDto, userId);
   }
 
-  @Patch(':categId/image')
+  @Patch(':id/image')
   @Roles(Role.ADMIN)
   @UseInterceptors(FileInterceptor('image'))
   updateImage(
-    @Param('categId', ParseObjectIdPipe) categId: Types.ObjectId,
+    @Param('id', ParseObjectIdPipe) categId: Types.ObjectId,
     @UploadedFile() file: Express.Multer.File,
     @User('id') userId: Types.ObjectId,
   ) {
     return this.categoryService.updateImage(categId, file, userId);
   }
 
-  @Delete(':categId')
+  @Delete(':id')
   @Roles(Role.ADMIN)
   remove(
-    @Param('categId') categId: Types.ObjectId,
+    @Param('id') categId: Types.ObjectId,
     @User('_id') userId: Types.ObjectId,
   ) {
     return this.categoryService.remove(categId, userId);
+  }
+
+  @Get(':id')
+  @Public()
+  findOne(@Param('id', ParseObjectIdPipe) categId: Types.ObjectId) {
+    return this.categoryService.findOne(categId);
   }
 
   @Get()
@@ -68,8 +74,5 @@ export class CategoryController {
     return this.categoryService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
-  }
+  
 }

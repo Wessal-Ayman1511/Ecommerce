@@ -24,8 +24,10 @@ export class RoleGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest();
 
-    if (!requiredRoles.includes(user?.role))
-      throw new UnauthorizedException("You Aren't Authorized!!");
+    if (requiredRoles?.length) {
+      if (!requiredRoles.includes(user?.role))
+        throw new UnauthorizedException("You Aren't Authorized!!");
+    }
 
     return true;
   }
