@@ -23,14 +23,14 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
   @Post()
   @Roles(Role.ADMIN)
-  @UseInterceptors(FileInterceptor('image', { storage: diskStorage({}) }))
+  @UseInterceptors(FileInterceptor('image'))
   create(
     @Body() data: CreateCategoryDto,
     @User('_id') userId: Types.ObjectId,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log(file)
-    return this.categoryService.create(data);
+    console.log(file);
+    return this.categoryService.create(data, userId, file);
   }
 
   @Get()
