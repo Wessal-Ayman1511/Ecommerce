@@ -75,6 +75,18 @@ export class CategoryService {
 
   }
 
+   async remove(categId: Types.ObjectId, userId: Types.ObjectId) {
+
+    const category = await this._CategoryRepository.findOne({filter: {_id: categId}})
+
+    if(!category) throw new NotFoundException("category not found!")
+
+
+    await category.deleteOne()
+    return {message: "category deleted successfully!"}
+    
+  }
+
   findAll() {
     return `This action returns all category`;
   }
@@ -83,7 +95,5 @@ export class CategoryService {
     return `This action returns a #${id} category`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
-  }
+ 
 }

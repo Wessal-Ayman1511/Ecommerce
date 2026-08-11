@@ -17,6 +17,7 @@ import { Role } from 'src/DB/enums/user.enum';
 import { Types } from 'mongoose';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('category')
 export class CategoryController {
@@ -35,22 +36,31 @@ export class CategoryController {
   @Patch(':categId')
   @Roles(Role.ADMIN)
   update(
-    @Param('categId') categId: Types.ObjectId,
+    @Param('categId', ParseObjectIdPipe) categId: Types.ObjectId,
     @Body() updateCategoryDto: UpdateCategoryDto,
-    @User("id") userId: Types.ObjectId
+    @User('id') userId: Types.ObjectId,
   ) {
     return this.categoryService.update(categId, updateCategoryDto, userId);
   }
 
   @Patch(':categId/image')
   @Roles(Role.ADMIN)
-  @UseInterceptors(FileInterceptor("image"))
+  @UseInterceptors(FileInterceptor('image'))
   updateImage(
-    @Param('categId') categId: Types.ObjectId,
+    @Param('categId', ParseObjectIdPipe) categId: Types.ObjectId,
     @UploadedFile() file: Express.Multer.File,
-    @User("id") userId: Types.ObjectId
+    @User('id') userId: Types.ObjectId,
   ) {
     return this.categoryService.updateImage(categId, file, userId);
+  }
+
+  @Delete(':categId')
+  @Roles(Role.ADMIN)
+  remove(
+    @Param('categId') categId: Types.ObjectId,
+    @User('_id') userId: Types.ObjectId,
+  ) {
+    return this.categoryService.remove(categId, userId);
   }
 
   @Get()
@@ -61,12 +71,5 @@ export class CategoryController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.categoryService.findOne(+id);
-  }
-
-  
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(+id);
   }
 }
