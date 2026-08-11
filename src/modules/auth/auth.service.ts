@@ -73,12 +73,13 @@ export class AuthService {
       user: user._id,
       token: refresh_token,
     });
+    console.log(access_token);
+    console.log(refresh_token);
 
     return {
       success: true,
       message: 'login successfully',
-      access_token,
-      refresh_token,
+      data: { access_token, refresh_token },
     };
   }
 

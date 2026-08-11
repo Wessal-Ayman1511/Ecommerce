@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Types } from 'mongoose';
@@ -25,17 +25,54 @@ export class CategoryService {
 
     const results = await this._FileUploadService.saveFileToCloud(
       [file],
-      `${rootFolder}/${data.name}/${cloudFolder}`,
+      {folder: `${rootFolder}/category/${cloudFolder}`},
     );
 
     const category = await this._CategoryRepository.create({
       name: data.name,
       image: results[0],
       createdBy: userId,
-      cloudFolder
+      cloudFolder,
+    });
+    return { data: category };
+  }
 
-    })
+  async update(categId: Types.ObjectId, updateCategoryDto: UpdateCategoryDto, userId: Types.ObjectId) {
+    const category = await this._CategoryRepository.findOne({filter: {_id: categId}})
+
+    if(!category) throw new NotFoundException("category not found!")
+
+    if(updateCategoryDto.name){
+      category.name = updateCategoryDto.name,
+      category.updatedBy = userId
+      await category.save()
+    }
+
+    
     return {data: category}
+
+  }
+
+  async updateImage(categId:Types.ObjectId, file:Express.Multer.File, userId:Types.ObjectId){
+
+    const category = await this._CategoryRepository.findOne({filter: {_id: categId}})
+
+    if(!category) throw new NotFoundException("category not found!")
+
+    const public_id = category.image.public_id
+
+    // update in cloud
+    const results = await this._FileUploadService.saveFileToCloud([file], {
+      public_id
+    })
+
+    // update in the db
+    category.image = results[0]
+    category.updatedBy = userId
+    await category.save()
+
+    return {data: category}
+
   }
 
   findAll() {
@@ -44,10 +81,6 @@ export class CategoryService {
 
   findOne(id: number) {
     return `This action returns a #${id} category`;
-  }
-
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
   }
 
   remove(id: number) {

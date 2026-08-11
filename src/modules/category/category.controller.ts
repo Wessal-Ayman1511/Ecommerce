@@ -29,8 +29,28 @@ export class CategoryController {
     @User('_id') userId: Types.ObjectId,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log(file);
     return this.categoryService.create(data, userId, file);
+  }
+
+  @Patch(':categId')
+  @Roles(Role.ADMIN)
+  update(
+    @Param('categId') categId: Types.ObjectId,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+    @User("id") userId: Types.ObjectId
+  ) {
+    return this.categoryService.update(categId, updateCategoryDto, userId);
+  }
+
+  @Patch(':categId/image')
+  @Roles(Role.ADMIN)
+  @UseInterceptors(FileInterceptor("image"))
+  updateImage(
+    @Param('categId') categId: Types.ObjectId,
+    @UploadedFile() file: Express.Multer.File,
+    @User("id") userId: Types.ObjectId
+  ) {
+    return this.categoryService.updateImage(categId, file, userId);
   }
 
   @Get()
@@ -43,13 +63,7 @@ export class CategoryController {
     return this.categoryService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateCategoryDto: UpdateCategoryDto,
-  ) {
-    return this.categoryService.update(+id, updateCategoryDto);
-  }
+  
 
   @Delete(':id')
   remove(@Param('id') id: string) {

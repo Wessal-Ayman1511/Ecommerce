@@ -22,6 +22,9 @@ class Category {
   @Prop({type: Types.ObjectId, ref: UserModelName, required: true})
   createdBy: Types.ObjectId
 
+  @Prop({type: Types.ObjectId, ref: UserModelName})
+  updatedBy: Types.ObjectId
+
   @Prop(raw({secure_url: String, public_id: String}))
   image: Image
 
