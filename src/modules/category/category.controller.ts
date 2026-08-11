@@ -1,19 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { RoleGuard } from 'src/common/guards';
 import { Roles, User } from 'src/common/decorators';
 import { Role } from 'src/DB/enums/user.enum';
 import { Types } from 'mongoose';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
-
   @Post()
   @Roles(Role.ADMIN)
-  create(@Body() data: CreateCategoryDto, @User("_id") userId: Types.ObjectId) {
+  @UseInterceptors(FileInterceptor('image', { storage: diskStorage({}) }))
+  create(
+    @Body() data: CreateCategoryDto,
+    @User('_id') userId: Types.ObjectId,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    console.log(file)
     return this.categoryService.create(data);
   }
 
@@ -28,7 +44,10 @@ export class CategoryController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
     return this.categoryService.update(+id, updateCategoryDto);
   }
 

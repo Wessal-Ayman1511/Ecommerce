@@ -11,9 +11,10 @@ export class ResponseMappingInterceptor implements NestInterceptor{
             //tap((res) => {console.log(`response before edit: ${res}`)}),
             map((res) => ({
                 success: true,
-                date: new Date(),
                 message: res.message || '',
-                data: res.data || []
+                data: res.data || [],
+                Date: new Date()
+                
             })),
             //tap((res) => {console.log(`response after edit: ${res}`)}),
         )
