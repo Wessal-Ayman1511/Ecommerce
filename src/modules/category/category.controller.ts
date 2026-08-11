@@ -14,8 +14,6 @@ export class CategoryController {
   @Post()
   @Roles(Role.ADMIN)
   create(@Body() data: CreateCategoryDto, @User("_id") userId: Types.ObjectId) {
-    console.log(data)
-    console.log(userId)
     return this.categoryService.create(data);
   }
 

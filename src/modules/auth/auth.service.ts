@@ -31,22 +31,18 @@ export class AuthService {
     private readonly _TokenRepository: TokenRepository,
   ) {}
   async register(data: CreateUserDTO) {
-    try {
-      const { email, otp } = data;
+    const { email, otp } = data;
 
-      const otpExist = await this._OTPRepository.findOne({ filter: { email } });
-      if (!otpExist || !compareHash(otp, otpExist.otp))
-        throw new NotFoundException("OTP Doesn't Match!");
-      await otpExist.deleteOne();
+    const otpExist = await this._OTPRepository.findOne({ filter: { email } });
+    if (!otpExist || !compareHash(otp, otpExist.otp))
+      throw new NotFoundException("OTP Doesn't Match!");
+    await otpExist.deleteOne();
 
-      const user = await this._UserService.create({
-        ...data,
-        accountActivated: true,
-      });
-      return { success: true, message: 'done', user };
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    const user = await this._UserService.create({
+      ...data,
+      accountActivated: true,
+    });
+    return { success: true, message: 'done', user };
   }
 
   async login(data: LoginDTO) {
@@ -88,92 +84,81 @@ export class AuthService {
 
   async sendOtp(data: SendOtpDTO) {
     // get email > check if email already registered > check if the user click sendOtp 2 times and keep last one only > send email > save in db
-    try {
-      const { email } = data;
 
-      const user = await this._UserService.userExistByEmail(email);
-      if (user) throw new BadRequestException('Email already registered!');
+    const { email } = data;
 
-      const otp = await this._OTPRepository.findOne({ filter: { email } });
-      if (otp) await otp.deleteOne();
+    const user = await this._UserService.userExistByEmail(email);
+    if (user) throw new BadRequestException('Email already registered!');
 
-      const newOtp = randomstring.generate(6);
+    const otp = await this._OTPRepository.findOne({ filter: { email } });
+    if (otp) await otp.deleteOne();
 
-      // send otp
-      this._MailerService.sendMail({
-        to: email,
-        subject: 'Account Activation',
-        text: `Your OTP is: ${newOtp}`,
-      });
-      // save in db
-      await this._OTPRepository.create({ email, otp: newOtp });
-      return { success: true, message: 'Check your Email!' };
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    const newOtp = randomstring.generate(6);
+
+    // send otp
+    this._MailerService.sendMail({
+      to: email,
+      subject: 'Account Activation',
+      text: `Your OTP is: ${newOtp}`,
+    });
+    // save in db
+    await this._OTPRepository.create({ email, otp: newOtp });
+    return { success: true, message: 'Check your Email!' };
   }
 
   async forgetPassword(data: ForgetPasswordDTO) {
-    try {
-      const { email } = data;
+    const { email } = data;
 
-      const user = await this._UserService.userExistByEmail(email);
-      if (!user)
-        throw new UnauthorizedException('This Email not linked to account!');
+    const user = await this._UserService.userExistByEmail(email);
+    if (!user)
+      throw new UnauthorizedException('This Email not linked to account!');
 
-      if (!user.accountActivated)
-        throw new BadRequestException('This account is not activated yet!');
+    if (!user.accountActivated)
+      throw new BadRequestException('This account is not activated yet!');
 
-      // this because if user  click on the send otp more than one time, the last one is the only valid one
-      const otp = await this._OTPRepository.findOne({ filter: { email } });
-      if (otp) await otp.deleteOne();
+    // this because if user  click on the send otp more than one time, the last one is the only valid one
+    const otp = await this._OTPRepository.findOne({ filter: { email } });
+    if (otp) await otp.deleteOne();
 
-      const newOtp = randomstring.generate(6);
+    const newOtp = randomstring.generate(6);
 
-      this._MailerService.sendMail({
-        to: email,
-        subject: 'Reset Password',
-        text: `Yout OTP is: ${newOtp}`,
-      });
-      await this._OTPRepository.create({ email, otp: newOtp });
+    this._MailerService.sendMail({
+      to: email,
+      subject: 'Reset Password',
+      text: `Yout OTP is: ${newOtp}`,
+    });
+    await this._OTPRepository.create({ email, otp: newOtp });
 
-      return { success: true, message: 'Check your Email!' };
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    return { success: true, message: 'Check your Email!' };
   }
 
   async resetPassword(data: ResetPasswordDTO) {
-    try {
-      const { email, password, otp } = data;
+    const { email, password, otp } = data;
 
-      const user = await this._UserService.userExistByEmail(email);
-      if (!user)
-        throw new UnauthorizedException('This Email not linked to account!');
+    const user = await this._UserService.userExistByEmail(email);
+    if (!user)
+      throw new UnauthorizedException('This Email not linked to account!');
 
-      if (!user.accountActivated)
-        throw new BadRequestException('This account is not activated yet!');
+    if (!user.accountActivated)
+      throw new BadRequestException('This account is not activated yet!');
 
-      const otpDoc = await this._OTPRepository.findOne({ filter: { email } });
-      if (!otpDoc || !compareHash(otp, otpDoc.otp))
-        throw new UnauthorizedException('Invalid OTP!');
+    const otpDoc = await this._OTPRepository.findOne({ filter: { email } });
+    if (!otpDoc || !compareHash(otp, otpDoc.otp))
+      throw new UnauthorizedException('Invalid OTP!');
 
-      user.password = password;
-      await user.save();
+    user.password = password;
+    await user.save();
 
-      const oldUserTokens = await this._TokenRepository.findAll({
-        filter: { user: user._id },
-      });
+    const oldUserTokens = await this._TokenRepository.findAll({
+      filter: { user: user._id },
+    });
 
-      if (oldUserTokens.data.length) {
-        for (const token of oldUserTokens.data) {
-          token.isValid = false;
-          await token.save();
-        }
+    if (oldUserTokens.data.length) {
+      for (const token of oldUserTokens.data) {
+        token.isValid = false;
+        await token.save();
       }
-      return { success: true, message: 'Passwrod reset successfully!' };
-    } catch (error) {
-      throw new InternalServerErrorException(error);
     }
+    return { success: true, message: 'Passwrod reset successfully!' };
   }
 }
