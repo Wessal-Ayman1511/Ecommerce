@@ -47,12 +47,30 @@ export abstract class AbstractRepository<TDocument> {
     if (populate) query.populate(populate);
     if (sort) query.sort(sort);
 
+    if (paginate?.page) {
+      const { page } = paginate;
+
+      const limit = 2;
+      const skip = (page - 1) * limit;
+      const totalSize = await query.model.countDocuments(query.getQuery());
+
+      const data = await query.skip(skip).limit(limit).exec();
+
+      return {
+        totalSize,
+        totalPages: Math.ceil(totalSize / limit),
+        pageSize: data.length,
+        pageNumber: page,
+        data,
+      };
+    }
+
     const data = await query.exec();
     return { data };
   }
 
   async create(doc: Partial<TDocument>): Promise<TDocument> {
-    return  this.model.create(doc);
+    return this.model.create(doc);
   }
 
   async update({

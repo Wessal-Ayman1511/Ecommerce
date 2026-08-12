@@ -46,21 +46,20 @@ class Category {
 export const CategorySchema = SchemaFactory.createForClass(Category);
 
 // hook for slug
-CategorySchema.pre('save', function (next) {
-  if (this.isModified('name')) {
-    this.slug = slugify(this.name);
-  }
-});
-
+// CategorySchema.pre('save', function (next) {
+//   if (this.isModified('name')) {
+//     this.slug = slugify(this.name);
+//   }
+// });
 // hook for deleting category from the cloud
 
-CategorySchema.post(
-  'deleteOne',
-  { document: true, query: false },
-  async function (doc) {
-    const categFolder = doc.cloudFolder;
-  },
-);
+// CategorySchema.post(
+//   'deleteOne',
+//   { document: true, query: false },
+//   async function (doc) {
+//     const categFolder = doc.cloudFolder;
+//   },
+// );
 
 // model name
 export const CategoryModelName = Category.name;

@@ -8,6 +8,7 @@ import { UserModule } from './modules/user/user.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { CategoryModule } from './modules/category/category.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     }),
     UserModule,
     CategoryModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],
