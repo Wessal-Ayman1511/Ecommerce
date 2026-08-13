@@ -9,6 +9,7 @@ import { FileUploadModule } from 'src/common/services/fileupload/file-upload.mod
 @Module({
   controllers: [ProductController],
   providers: [ProductService, ProductRepository], 
-  imports: [CategoryModule, ProductModel, FileUploadModule]
+  imports: [CategoryModule, ProductModel, FileUploadModule],
+  exports: [ProductService, ProductRepository]
 })
 export class ProductModule {}

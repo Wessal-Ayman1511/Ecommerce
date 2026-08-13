@@ -20,11 +20,10 @@ export class CategoryService {
     file: Express.Multer.File,
   ) {
     // upload to cloud then save in the db
-    const rootFolder = this._ConfigService.get('CLOUD_ROOT_FOLDER');
-    const cloudFolder = nanoid();
+    const cloudFolder = `${this._ConfigService.get('CLOUD_ROOT_FOLDER')}/category/${nanoid()}`;
 
     const results = await this._FileUploadService.saveFileToCloud([file], {
-      folder: `${rootFolder}/category/${cloudFolder}`,
+      folder: cloudFolder,
     });
 
     const category = await this._CategoryRepository.create({

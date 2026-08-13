@@ -15,6 +15,7 @@ import { Image } from 'src/common/types';
 import { FindAllProductsDto, RemoveImageDto } from './dto';
 import { MAX_IMAGES_FOR_PRODUCT } from 'src/common/constants';
 import slugify from 'slugify';
+import { ProductDocument } from 'src/DB/models';
 
 @Injectable()
 export class ProductService {
@@ -201,5 +202,10 @@ export class ProductService {
 
   findOne(id: number) {
     return `This action returns a #${id} product`;
+  }
+
+
+   inStock(product: ProductDocument, quantity: number): boolean{
+    return product.stock >= quantity? true: false
   }
 }

@@ -10,6 +10,7 @@ import {
 import { OTPModel, TokenModel } from 'src/DB/models';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGaurd, RoleGuard } from 'src/common/guards';
+import { CartModule } from '../cart/cart.module';
 ;
 
 
@@ -29,6 +30,6 @@ import { AuthenticationGaurd, RoleGuard } from 'src/common/guards';
       useClass: RoleGuard
     },
   ],
-  imports: [UserModule, OTPModel, TokenModel],
+  imports: [UserModule, OTPModel, TokenModel, CartModule],
 })
 export class AuthModule {}

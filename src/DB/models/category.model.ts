@@ -86,10 +86,7 @@ export const CategoryModel = MongooseModule.forFeatureAsync([
         'deleteOne',
         { document: true, query: false },
         async function (doc) {
-          const categFolder = doc.cloudFolder;
-          const rootFolder = configService.get("CLOUD_ROOT_FOLDER")
-          const folderPath = `${rootFolder}/category/${categFolder}`
-          await fileUploadService.deleteFolder(folderPath)
+          await fileUploadService.deleteFolder(doc.cloudFolder)
         },
       );
 

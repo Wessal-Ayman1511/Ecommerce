@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as randomstring from 'randomstring';
 import { UserService } from '../user/user.service';
-import { OTPRepository, TokenRepository } from 'src/DB/repositories';
+import { CartRepository, OTPRepository, TokenRepository } from 'src/DB/repositories';
 import {
   ForgetPasswordDTO,
   LoginDTO,
@@ -29,6 +29,7 @@ export class AuthService {
     private readonly _JwtService: JwtService,
     private readonly _OTPRepository: OTPRepository,
     private readonly _TokenRepository: TokenRepository,
+    private readonly _CartRepository: CartRepository,
   ) {}
   async register(data: CreateUserDTO) {
     const { email, otp } = data;
@@ -42,6 +43,10 @@ export class AuthService {
       ...data,
       accountActivated: true,
     });
+
+    // create cart for the user
+    await this._CartRepository.create({user: user._id})
+    
     return { success: true, message: 'done', user };
   }
 
