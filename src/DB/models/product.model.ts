@@ -12,6 +12,9 @@ import { UserModelName } from './user.model';
 import type { Image } from 'src/common/types';
 import slugify from 'slugify';
 import { CategoryModelName } from './category.model';
+import { FileUploadModule } from 'src/common/services/fileupload/file-upload.module';
+import { FilteUploadService } from 'src/common/services/fileupload';
+import { ProductService } from 'src/modules/product/product.service';
 
 @Schema({ timestamps: true })
 class Product {
@@ -27,7 +30,7 @@ class Product {
   })
   name: string;
 
-  @Prop({ type: String, unique: true, required: false })
+  @Prop({ type: String, required: false, unique: false })
   description: String;
 
   @Prop({ type: String, unique: true })
@@ -48,7 +51,7 @@ class Product {
   @Prop({ Type: String })
   cloudFolder: string;
 
-  @Prop({type: Types.ObjectId, ref: CategoryModelName, required: true})
+  @Prop({ type: Types.ObjectId, ref: CategoryModelName, required: true })
   category: Types.ObjectId;
 
   @Prop({ Type: Number, min: 1, required: true })
@@ -63,7 +66,7 @@ class Product {
   @Prop({
     Type: Number,
     min: 0,
-    max: 100
+    max: 100,
   })
   discount: number;
 
@@ -71,7 +74,7 @@ class Product {
     Type: Number,
     default: function (this: Product) {
       return this.price - (this.price * this.discount || 0) / 100;
-    }
+    },
   })
   finalPrice: number;
 
@@ -86,8 +89,23 @@ export const ProductSchema = SchemaFactory.createForClass(Product);
 // model name
 export const ProductModelName = Product.name;
 // model
-export const ProductModel = MongooseModule.forFeature([
-  { name: ProductModelName, schema: ProductSchema },
+
+export const ProductModel = MongooseModule.forFeatureAsync([
+  {
+    name: ProductModelName,
+    useFactory: (FileUploadService: FilteUploadService) => {
+      ProductSchema.post(
+        'deleteOne',
+        { document: true, query: false },
+        async function (doc) {
+          await FileUploadService.deleteFolder(doc.cloudFolder);
+        },
+      );
+      return ProductSchema;
+    },
+    imports: [FileUploadModule],
+    inject: [FilteUploadService],
+  },
 ]);
 
 // Product type

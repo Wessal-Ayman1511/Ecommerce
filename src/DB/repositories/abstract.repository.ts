@@ -16,7 +16,7 @@ export type findAllArgs<TDocument> = findOneArgs<TDocument> & {
 
 export type updateArgs<TDocument> = {
   filter: QueryFilter<TDocument>;
-  updatedDoc: UpdateQuery<TDocument>;
+  update: UpdateQuery<TDocument>;
   select?: string;
   populate?: any;
 };
@@ -75,12 +75,12 @@ export abstract class AbstractRepository<TDocument> {
 
   async update({
     filter,
-    updatedDoc,
+    update,
     select,
     populate,
   }: updateArgs<TDocument>): Promise<TDocument | null> {
-    let query = this.model.findOneAndUpdate(filter, updatedDoc, {
-      new: true,
+    let query = this.model.findOneAndUpdate(filter, update, {
+      returnDocument: 'after',
       runValidators: true,
     });
     if (select) query.select(select);
