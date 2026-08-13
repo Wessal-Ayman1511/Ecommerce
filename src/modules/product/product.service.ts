@@ -12,7 +12,7 @@ import { CategoryRepository, ProductRepository } from 'src/DB/repositories';
 import { FilteUploadService } from 'src/common/services/fileupload';
 import { nanoid } from 'nanoid';
 import { Image } from 'src/common/types';
-import { RemoveImageDto } from './dto';
+import { FindAllProductsDto, RemoveImageDto } from './dto';
 import { MAX_IMAGES_FOR_PRODUCT } from 'src/common/constants';
 import slugify from 'slugify';
 
@@ -161,18 +161,42 @@ export class ProductService {
     return { data: product, message: 'Image Added Successfully' };
   }
 
-  async remove( productId: Types.ObjectId) {
+  async remove(productId: Types.ObjectId) {
     const product = await this._ProductRepository.findOne({
-      filter: {_id: productId}
-    })
-    if(!product) throw new NotFoundException("Product Not Found!")
+      filter: { _id: productId },
+    });
+    if (!product) throw new NotFoundException('Product Not Found!');
 
-    await product.deleteOne()
-    return {message: "Product Deleted Successfully!"}
+    await product.deleteOne();
+    return { message: 'Product Deleted Successfully!' };
   }
 
-  findAll() {
-    return `This action returns all product`;
+  async findAll(query: FindAllProductsDto) {
+    const products = await this._ProductRepository.findAll({
+      filter: {
+        ...(query.category && { category: new Types.ObjectId(query.category) }),
+        ...(query.q && {
+          $or: [
+            { name: { $regex: query.q, $options: 'i' } },
+            { description: { $regex: query.q, $options: 'i' } },
+          ],
+        }),
+        ...(query.price && {
+          finalPrice: {
+            ...(query.price.min !== undefined && { $gte: query.price.min }),
+            ...(query.price.max !== undefined && { $lte: query.price.max }),
+          },
+        }),
+      },
+      sort: {
+        ...(query.sort?.by && {
+          [query.sort.by]: query.sort.dir ? query.sort.dir : 1,
+        }),
+      },
+      paginate: { page: query.page ?? 1 },
+    });
+
+    return { data: products };
   }
 
   findOne(id: number) {

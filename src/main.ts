@@ -2,15 +2,19 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
-import {
-  ResponseMappingInterceptor,
-} from './common/interceptors';
+import { ResponseMappingInterceptor } from './common/interceptors';
 import { HttpExceptionFilter } from './common/filters';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set('query parser', 'extended');
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true}),
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
   );
   app.useGlobalInterceptors(new ResponseMappingInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());

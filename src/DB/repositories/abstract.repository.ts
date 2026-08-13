@@ -11,7 +11,7 @@ export type findOneArgs<TDocument> = {
 
 export type findAllArgs<TDocument> = findOneArgs<TDocument> & {
   paginate?: Ipaginate;
-  sort?: any;
+  sort?: Record<string, -1 | 1>;
 };
 
 export type updateArgs<TDocument> = {
@@ -47,8 +47,8 @@ export abstract class AbstractRepository<TDocument> {
     if (populate) query.populate(populate);
     if (sort) query.sort(sort);
 
-    if (paginate?.page) {
-      const { page } = paginate;
+    
+      const page  = paginate?.page ? paginate.page: 1;
 
       const limit = 2;
       const skip = (page - 1) * limit;
@@ -63,10 +63,7 @@ export abstract class AbstractRepository<TDocument> {
         pageNumber: page,
         data,
       };
-    }
-
-    const data = await query.exec();
-    return { data };
+    
   }
 
   async create(doc: Partial<TDocument>): Promise<TDocument> {

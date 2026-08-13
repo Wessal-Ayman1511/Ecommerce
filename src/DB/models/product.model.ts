@@ -31,7 +31,7 @@ class Product {
   name: string;
 
   @Prop({ type: String, required: false, unique: false })
-  description: String;
+  description: string;
 
   @Prop({ type: String, unique: true })
   slug: String;

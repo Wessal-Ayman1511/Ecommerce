@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 
-import { Roles, User } from 'src/common/decorators';
+import { Public, Roles, User } from 'src/common/decorators';
 import { Role } from 'src/DB/enums/user.enum';
 import { Types } from 'mongoose';
 import {
@@ -25,7 +25,7 @@ import {
 import { RequiredthumbnailPipe } from './pipes/require-thumbnail.pipe';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { request } from 'express';
-import { CreateProductDto, RemoveImageDto, UpdateProductDto } from './dto';
+import { CreateProductDto, FindAllProductsDto, RemoveImageDto, UpdateProductDto } from './dto';
 import { Image } from 'src/common/types';
 import { MAX_IMAGES_FOR_PRODUCT } from 'src/common/constants';
 
@@ -92,8 +92,11 @@ export class ProductController {
   }
 
   @Get()
-  findAll() {
-    return this.productService.findAll();
+  @Public()
+  findAll(
+    @Query() query: FindAllProductsDto
+  ) {
+    return this.productService.findAll(query);
   }
 
   @Get(':id')
