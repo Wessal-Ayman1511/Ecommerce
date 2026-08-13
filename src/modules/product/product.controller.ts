@@ -87,9 +87,8 @@ export class ProductController {
   @Roles(Role.ADMIN, Role.SELLER)
   remove(
     @Param('productId', ParseObjectIdPipe) productId: Types.ObjectId,
-    @User('_id') userId: Types.ObjectId,
   ) {
-    return this.productService.remove(productId, userId);
+    return this.productService.remove(productId);
   }
 
   @Get()

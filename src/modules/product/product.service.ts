@@ -161,15 +161,21 @@ export class ProductService {
     return { data: product, message: 'Image Added Successfully' };
   }
 
+  async remove( productId: Types.ObjectId) {
+    const product = await this._ProductRepository.findOne({
+      filter: {_id: productId}
+    })
+    if(!product) throw new NotFoundException("Product Not Found!")
+
+    await product.deleteOne()
+    return {message: "Product Deleted Successfully!"}
+  }
+
   findAll() {
     return `This action returns all product`;
   }
 
   findOne(id: number) {
     return `This action returns a #${id} product`;
-  }
-
-  remove(userId: Types.ObjectId, productId: Types.ObjectId) {
-    
   }
 }
