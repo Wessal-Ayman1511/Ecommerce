@@ -28,7 +28,7 @@ export class FilteUploadService {
   async saveFileToCloud(
     files: Express.Multer.File[],
     options: UploadApiOptions,
-  ) {
+  ):Promise<Image[]> {
     let savedFiles: Image[] = [];
 
     for (const file of files) {

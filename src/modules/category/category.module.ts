@@ -9,5 +9,6 @@ import { CategoryModel } from 'src/DB/models';
   imports: [CategoryModel],
   controllers: [CategoryController],
   providers: [CategoryService, FilteUploadService, CategoryRepository, CloudinaryProvider],
+  exports: [CategoryRepository]
 })
 export class CategoryModule {}

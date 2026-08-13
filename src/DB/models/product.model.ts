@@ -8,10 +8,10 @@ import {
   SchemaFactory,
 } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import {  UserModelName } from './user.model';
+import { UserModelName } from './user.model';
 import type { Image } from 'src/common/types';
 import slugify from 'slugify';
-
+import { CategoryModelName } from './category.model';
 
 @Schema({ timestamps: true })
 class Product {
@@ -21,11 +21,14 @@ class Product {
     unique: true,
     index: { name: 'product_name_index' },
     set: function (this: Product, value: string) {
-      this.slug = slugify(value)
-      return value
+      this.slug = slugify(value);
+      return value;
     },
   })
   name: string;
+
+  @Prop({ type: String, unique: true, required: false })
+  description: String;
 
   @Prop({ type: String, unique: true })
   slug: String;
@@ -45,6 +48,9 @@ class Product {
   @Prop({ Type: String })
   cloudFolder: string;
 
+  @Prop({type: Types.ObjectId, ref: CategoryModelName, required: true})
+  category: Types.ObjectId;
+
   @Prop({ Type: Number, min: 1, required: true })
   stock: number;
 
@@ -56,19 +62,17 @@ class Product {
 
   @Prop({
     Type: Number,
-    required: true,
     min: 0,
-    max: 100,
-    set: function (this: Product, value: number) {
-      this.finalPrice = this.price - (this.price * value) / 100;
-      return value;
-    },
+    max: 100
   })
   discount: number;
 
-  @Prop({ Type: Number, required: true, default: function(this: Product) {
-    return this.price
-  }})
+  @Prop({
+    Type: Number,
+    default: function (this: Product) {
+      return this.price - (this.price * this.discount || 0) / 100;
+    }
+  })
   finalPrice: number;
 
   @Prop({ Type: Number, min: 0, max: 5 })

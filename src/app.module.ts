@@ -40,6 +40,7 @@ import { ProductModule } from './modules/product/product.module';
     UserModule,
     CategoryModule,
     ProductModule,
+    
   ],
   controllers: [AppController],
   providers: [AppService],

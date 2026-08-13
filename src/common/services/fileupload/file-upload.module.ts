@@ -1,9 +1,10 @@
 import { Module } from "@nestjs/common";
 import { FilteUploadService } from "./file-upload.service";
 import { CloudinaryProvider } from "./cloudinary.provider";
+import { APP_INTERCEPTOR } from "@nestjs/core";
 
 @Module({
-    providers: [FilteUploadService, CloudinaryProvider ],
+    providers: [FilteUploadService, CloudinaryProvider, ],
     exports: [FilteUploadService, CloudinaryProvider]
 })
 

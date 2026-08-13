@@ -11,8 +11,8 @@ export class ResponseMappingInterceptor implements NestInterceptor{
             //tap((res) => {console.log(`response before edit: ${res}`)}),
             map((res) => ({
                 success: true,
-                message: res.message || '',
-                data: res.data || [],
+                message: res?.message || '',
+                data: res?.data || [],
                 Date: new Date()
                 
             })),
