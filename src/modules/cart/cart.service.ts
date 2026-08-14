@@ -78,6 +78,27 @@ export class CartService {
     return { data: addedProduct, message: 'Product Added Successfully' };
   }
 
+  async updateCart(data: CartDto, userId: Types.ObjectId) {
+    const { productId, quantity } = data;
+    // find Product
+    const product = await this._ProductRespository.findOne({
+      filter: { _id: productId },
+    });
+    if (!product) throw new NotFoundException('Product Not Found!');
+
+    // check product in stock
+    if (!this._ProductService.inStock(product, quantity))
+      throw new BadRequestException(
+        `there is only ${product.stock} items in the stock`,
+      );
+
+      const cart = await this._CartRepository.update({
+        filter: {user: userId, 'products.productId': productId},
+        update:{'products.$.quantity': quantity, 'products.$.price': product.finalPrice}
+      })
+      return {data: cart, message: "Cart Updated Successfully"}
+      }
+
   findAll() {
     return `This action returns all cart`;
   }

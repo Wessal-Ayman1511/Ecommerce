@@ -24,6 +24,11 @@ export class CartController {
   addToCart(@Body() data: CartDto, @User('_id') userId: Types.ObjectId) {
     return this.cartService.addToCart(data, userId);
   }
+  @Patch()
+  @Roles(Role.USER)
+  updateCart(@Body() data: CartDto, @User('_id') userId: Types.ObjectId) {
+    return this.cartService.updateCart(data, userId);
+  }
 
   @Get()
   findAll() {
