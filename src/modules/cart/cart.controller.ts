@@ -30,6 +30,12 @@ export class CartController {
     return this.cartService.updateCart(data, userId);
   }
 
+  @Patch('/clear')
+  @Roles(Role.USER)
+  clearCart(@User('_id') userId: Types.ObjectId) {
+    return this.cartService.clearCart(userId);
+  }
+
   @Get()
   findAll() {
     return this.cartService.findAll();

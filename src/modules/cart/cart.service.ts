@@ -92,12 +92,24 @@ export class CartService {
         `there is only ${product.stock} items in the stock`,
       );
 
-      const cart = await this._CartRepository.update({
-        filter: {user: userId, 'products.productId': productId},
-        update:{'products.$.quantity': quantity, 'products.$.price': product.finalPrice}
-      })
-      return {data: cart, message: "Cart Updated Successfully"}
-      }
+    const cart = await this._CartRepository.update({
+      filter: { user: userId, 'products.productId': productId },
+      update: {
+        'products.$.quantity': quantity,
+        'products.$.price': product.finalPrice,
+      },
+    });
+    return { data: cart, message: 'Cart Updated Successfully' };
+  }
+
+  async clearCart(userId: Types.ObjectId) {
+    const cart = await this._CartRepository.update({
+      filter: { user: userId },
+      update: { products: [] },
+    });
+
+    return { data: cart, message: 'Cart Cleared Successfully!' };
+  }
 
   findAll() {
     return `This action returns all cart`;
