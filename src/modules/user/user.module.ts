@@ -10,7 +10,7 @@ import { TokenModel } from 'src/DB/models';
 @Module({
   imports: [UserModel, TokenModel],
   providers: [UserService, UserRepository, JwtService, TokenRepository],
-  exports: [UserService, UserRepository],
+  exports: [UserService, UserRepository, TokenRepository],
   controllers: [UserController]
 })
 export class UserModule {}

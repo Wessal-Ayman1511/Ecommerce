@@ -16,6 +16,7 @@ import { FindAllProductsDto, RemoveImageDto } from './dto';
 import { MAX_IMAGES_FOR_PRODUCT } from 'src/common/constants';
 import slugify from 'slugify';
 import { ProductDocument } from 'src/DB/models';
+import { StockGateway } from '../socket/stock.gateway';
 
 @Injectable()
 export class ProductService {
@@ -24,6 +25,7 @@ export class ProductService {
     private readonly _ProductRepository: ProductRepository,
     private readonly _ConfigService: ConfigService,
     private readonly _FilteUploadService: FilteUploadService,
+    private readonly _StockGateway: StockGateway,
   ) {}
 
   async create(
@@ -163,10 +165,7 @@ export class ProductService {
   }
 
   async remove(productId: Types.ObjectId) {
-    const product = await this._ProductRepository.findOne({
-      filter: { _id: productId },
-    });
-    if (!product) throw new NotFoundException('Product Not Found!');
+    const product = await this.checkProductExistance(productId);
 
     await product.deleteOne();
     return { message: 'Product Deleted Successfully!' };
@@ -204,8 +203,31 @@ export class ProductService {
     return `This action returns a #${id} product`;
   }
 
+  inStock(product: ProductDocument, quantity: number): boolean {
+    return product.stock >= quantity ? true : false;
+  }
 
-   inStock(product: ProductDocument, quantity: number): boolean{
-    return product.stock >= quantity? true: false
+  async updateStock(
+    productId: Types.ObjectId,
+    quantity: number,
+    increment: boolean,
+  ) {
+    const product = await this._ProductRepository.update({
+      filter: { _id: productId },
+      update: { $inc: { stock: increment ? quantity : -quantity } },
+    });
+
+    // socket
+    this._StockGateway.broadcastStockUpdate(product!._id, product!.stock);
+
+    return product;
+  }
+
+  async checkProductExistance(productId: Types.ObjectId) {
+    const product = await this._ProductRepository.findOne({
+      filter: { _id: productId },
+    });
+    if (!product) throw new NotFoundException('Product Not Found!');
+    return product;
   }
 }

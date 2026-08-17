@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Test</title>
+
+  <!-- Socket.IO client -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 50px auto;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    #status {
+      margin: 20px 0;
+      font-weight: bold;
+    }
+
+    #updates {
+      margin-top: 20px;
+    }
+
+    .update {
+      padding: 15px;
+      margin: 10px 0;
+      background: #f1f1f1;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Stock Test</h1>
+
+  <label>JWT Token:</label>
+
+  <input
+    id="token"
+    type="text"
+    placeholder="Paste your JWT token here"
+  />
+
+  <button onclick="connectSocket()">
+    Connect
+  </button>
+
+  <button onclick="getData()">
+    Get Data
+  </button>
+
+  <div id="status">
+    Disconnected
+  </div>
+
+  <h2>Stock Updates</h2>
+
+  <div id="updates"></div>
+
+
+  <script>
+
+    let socket;
+
+    function connectSocket() {
+
+      const token = document.getElementById("token").value;
+
+      if (!token) {
+        alert("Please enter your JWT token");
+        return;
+      }
+
+      socket = io("http://localhost:3000", {
+
+        auth: {
+          authorization: `Bearer ${token}`
+        }
+
+      });
+
+
+      // Connection successful
+      socket.on("connect", () => {
+
+        document.getElementById("status").innerText =
+          `Connected ✅ Socket ID: ${socket.id}`;
+
+        console.log("Connected:", socket.id);
+
+      });
+
+
+      // Connection error
+      socket.on("connect_error", (error) => {
+
+        document.getElementById("status").innerText =
+          `Connection Error ❌ ${error.message}`;
+
+        console.error(error);
+
+      });
+
+
+      // Listen for update-stock
+      socket.on("update-stock", (data) => {
+
+        console.log("Stock update received:", data);
+
+        const updates = document.getElementById("updates");
+
+        const div = document.createElement("div");
+
+        div.className = "update";
+
+        div.innerHTML = `
+          <strong>Stock Updated!</strong>
+          <br>
+          Product ID: ${data.productId}
+          <br>
+          New Stock: ${data.newStock}
+        `;
+
+        updates.prepend(div);
+
+      });
+
+    }
+
+
+    function getData() {
+
+      if (!socket) {
+        alert("Connect to the server first");
+        return;
+      }
+
+      console.log("Sending get-data event...");
+
+      socket.emit("get-data", {
+        message: "Hello from frontend"
+      });
+
+    }
+
+  </script>
+
+</body>
+</html>

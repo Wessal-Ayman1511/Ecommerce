@@ -111,6 +111,10 @@ export class CartService {
     return { data: cart, message: 'Cart Cleared Successfully!' };
   }
 
+  async getCart(userId: Types.ObjectId) {
+    return await this._CartRepository.findOne({ filter: { user: userId } });
+  }
+
   findAll() {
     return `This action returns all cart`;
   }
