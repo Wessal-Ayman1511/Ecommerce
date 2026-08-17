@@ -7,7 +7,8 @@ import { StripeProvider } from "./payment.provider";
 
 
 @Module({
-    providers: [PaymentService, StripeProvider]
+    providers: [PaymentService, StripeProvider],
+    exports: [PaymentService]
 })
 
 export class PaymentModule{}
