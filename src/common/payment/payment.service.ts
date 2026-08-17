@@ -1,6 +1,6 @@
 import { Inject } from "@nestjs/common";
 import { STRIPE_CLIENT } from "../constants";
-import { Checkout, type Stripe } from "stripe";
+import { Checkout, CouponCreateParams, type Stripe } from "stripe";
 
 
 
@@ -21,5 +21,9 @@ export class PaymentService {
             metadata
         })
         return session
+    }
+
+    async createCoupon({currency, percent_off}:CouponCreateParams ){
+        return this.stripe.coupons.create({currency, percent_off})
     }
 }
