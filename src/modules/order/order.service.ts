@@ -116,18 +116,34 @@ export class OrderService {
     return session;
   }
 
-  async stripeWebhook(info: any){
-    const orderId =   info.data.object.metadata
+  async stripeWebhook(info: any) {
+    const orderId = info.data.object.metadata;
 
     const order = await this._OrderRepository.update({
-      filter: {_id: Types.ObjectId.createFromHexString(orderId), paid: false, paymentMethod: PaymendMethod.card},
+      filter: {
+        _id: Types.ObjectId.createFromHexString(orderId),
+        paid: false,
+        paymentMethod: PaymendMethod.card,
+      },
       update: {
         paid: true,
-        payment_intent: info.data.object.payment_intent
-      }
-    })
+        payment_intent: info.data.object.payment_intent,
+      },
+    });
+    // update stock
+    const cart = await this._CartService.getCart(order!.user);
+    const products = cart!.products;
 
-    await this._CartService.clearCart(order!.user)
+    for (const prd of products) {
+      await this._ProductService.updateStock(
+        prd.productId,
+        prd.quantity,
+        false,
+      );
+    }
+
+    // clear cart
+    await this._CartService.clearCart(order!.user);
   }
 
   findAll() {
