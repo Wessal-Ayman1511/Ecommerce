@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { User } from 'src/common/decorators';
+import { Public, User } from 'src/common/decorators';
 import { type UserDocument } from 'src/DB/models';
 
 @Controller('order')
@@ -12,6 +12,13 @@ export class OrderController {
   @Post()
   create(@Body() data: CreateOrderDto, @User() user: UserDocument) {
     return this.orderService.create(data, user);
+  }
+
+  @Post('/webhook')
+  @Public()
+  stripeWebhook(@Body() data: any) {
+    this.orderService.stripeWebhook(data)
+    return
   }
 
   @Get()

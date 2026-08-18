@@ -7,6 +7,7 @@ import { ProductService } from '../product/product.service';
 import { OrderRepository } from 'src/DB/repositories';
 import { PaymendMethod } from 'src/DB/enums/order.enum';
 import { PaymentService } from 'src/common/payment/payment.service';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class OrderService {
@@ -65,6 +66,8 @@ export class OrderService {
           false,
         );
       }
+
+      await this._CartService.clearCart(userId);
       return { message: 'done' };
     }
 
@@ -79,8 +82,6 @@ export class OrderService {
     }
 
     // clear cart
-
-    return { data: order, message: 'order created successfully!' };
   }
 
   async paymentWithCard(orderId, products, userEmail) {
@@ -97,17 +98,36 @@ export class OrderService {
     }));
 
     // coaponId
-    const {id} = await this._PaymentService.createCoupon({currency: 'egp', percent_off: 20})
+    const { id } = await this._PaymentService.createCoupon({
+      currency: 'egp',
+      percent_off: 20,
+    });
 
     const session = await this._PaymentService.createCheckoutSession({
       line_items,
       metadata: { orderId },
       customer_email: userEmail,
-      discounts: [{
-        coupon: id
-      }]
+      discounts: [
+        {
+          coupon: id,
+        },
+      ],
     });
     return session;
+  }
+
+  async stripeWebhook(info: any){
+    const orderId =   info.data.object.metadata
+
+    const order = await this._OrderRepository.update({
+      filter: {_id: Types.ObjectId.createFromHexString(orderId), paid: false, paymentMethod: PaymendMethod.card},
+      update: {
+        paid: true,
+        payment_intent: info.data.object.payment_intent
+      }
+    })
+
+    await this._CartService.clearCart(order!.user)
   }
 
   findAll() {
