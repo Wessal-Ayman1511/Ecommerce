@@ -1,11 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { UserDocument } from 'src/DB/models';
 import { CartService } from '../cart/cart.service';
 import { ProductService } from '../product/product.service';
 import { OrderRepository } from 'src/DB/repositories';
-import { PaymendMethod } from 'src/DB/enums/order.enum';
+import { OrderStatus, PaymendMethod } from 'src/DB/enums/order.enum';
 import { PaymentService } from 'src/common/payment/payment.service';
 import { Types } from 'mongoose';
 
@@ -39,6 +43,7 @@ export class OrderService {
         );
       price += product.finalPrice * prod.quantity;
 
+      // prepare products to help in pay with card
       products.push({
         name: product.name,
         image: product.thumbnail?.secure_url,
@@ -78,10 +83,9 @@ export class OrderService {
         products,
         user.email,
       );
+      // update orderstatus, upadte stock and clear cart happen in webhook
       return { message: 'Payment Completed Successfully!', data: session.url };
     }
-
-    // clear cart
   }
 
   async paymentWithCard(orderId, products, userEmail) {
@@ -116,8 +120,30 @@ export class OrderService {
     return session;
   }
 
+  async cancelOrder(id: Types.ObjectId, userId: Types.ObjectId) {
+    const order = await this._OrderRepository.findOne({
+      filter: { _id: id, user: userId },
+    });
+
+    if (!order) throw new NotFoundException('Order Not Found!');
+
+    const paymentIntent = order.payment_intent;
+    console.log(paymentIntent);
+
+    if (order.paymentMethod == PaymendMethod.card) {
+      await this._PaymentService.refund(order.payment_intent);
+      order.orderStatus = OrderStatus.refunded;
+    }
+    order.orderStatus = OrderStatus.canceled;
+
+    await order.save();
+
+    return { message: 'Order Refunded Successfully!' };
+  }
+
   async stripeWebhook(info: any) {
-    const orderId = info.data.object.metadata;
+    const {orderId} = info.data.object.metadata;
+    console.log(orderId)
 
     const order = await this._OrderRepository.update({
       filter: {
