@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
   Type,
@@ -17,6 +18,7 @@ import { MAX_IMAGES_FOR_PRODUCT } from 'src/common/constants';
 import slugify from 'slugify';
 import { ProductDocument } from 'src/DB/models';
 import { StockGateway } from '../socket/stock.gateway';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class ProductService {
@@ -26,6 +28,7 @@ export class ProductService {
     private readonly _ConfigService: ConfigService,
     private readonly _FilteUploadService: FilteUploadService,
     private readonly _StockGateway: StockGateway,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
   async create(
@@ -172,6 +175,13 @@ export class ProductService {
   }
 
   async findAll(query: FindAllProductsDto) {
+
+    const key =  `products#${JSON.stringify(query)}`
+    let cachedProducts = await this.cacheManager.get(key)
+    if(cachedProducts) return {data: cachedProducts}
+
+
+
     const products = await this._ProductRepository.findAll({
       filter: {
         ...(query.category && { category: new Types.ObjectId(query.category) }),
@@ -195,6 +205,8 @@ export class ProductService {
       },
       paginate: { page: query.page ?? 1 },
     });
+
+    await this.cacheManager.set(key, products, 50000)
 
     return { data: products };
   }
@@ -230,4 +242,17 @@ export class ProductService {
     if (!product) throw new NotFoundException('Product Not Found!');
     return product;
   }
+
+  async testCache(){
+
+    // set
+    //await this.cacheManager.set("testCashe", "HI", 15000)
+
+
+    // get 
+    const result = await this.cacheManager.get("testCashe")
+
+    return {data: result}
+  }
+
 }

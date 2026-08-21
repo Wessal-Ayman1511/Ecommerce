@@ -11,6 +11,10 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { ProductModule } from './modules/product/product.module';
 import { CartModule } from './modules/cart/cart.module';
 import { OrderModule } from './modules/order/order.module';
+//import { CacheModule } from '@nestjs/cache-manager';
+import { CacheableMemory, createKeyv, Keyv } from 'cacheable';
+import { CacheModule } from '@nestjs/cache-manager';
+
 
 @Module({
   imports: [
@@ -39,18 +43,31 @@ import { OrderModule } from './modules/order/order.module';
         };
       },
     }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: (configService: ConfigService) => {
+        return {
+          stores: [
+            new Keyv({
+              store: new CacheableMemory(),
+            }),
+            createKeyv(configService.get('REDIS_CLOUD')),
+          ],
+        };
+      },
+      inject: [ConfigService]
+    }),
     UserModule,
     CategoryModule,
     ProductModule,
     CartModule,
     OrderModule,
-    
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes("*")
+    consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 }

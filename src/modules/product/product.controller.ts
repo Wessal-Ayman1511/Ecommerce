@@ -103,4 +103,10 @@ export class ProductController {
   findOne(@Param('id') id: string) {
     return this.productService.findOne(+id);
   }
+
+  @Get("/redis/cache")
+  @Public()
+  testCache(){
+    return this.productService.testCache()
+  }
 }

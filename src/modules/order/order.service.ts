@@ -127,6 +127,8 @@ export class OrderService {
 
     if (!order) throw new NotFoundException('Order Not Found!');
 
+    // update products stock
+
     const paymentIntent = order.payment_intent;
     console.log(paymentIntent);
 
@@ -142,8 +144,8 @@ export class OrderService {
   }
 
   async stripeWebhook(info: any) {
-    const {orderId} = info.data.object.metadata;
-    console.log(orderId)
+    const { orderId } = info.data.object.metadata;
+    console.log(orderId);
 
     const order = await this._OrderRepository.update({
       filter: {
