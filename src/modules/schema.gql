@@ -2,18 +2,18 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type OneUserResponse {
+  _id: ID!
+  firstName: String!
+  lastName: String!
+}
+
 type AllOrdersResponse {
   totalSize: Int!
   totalPages: Int!
   pageSize: Int!
   pageNumber: Int!
   data: [OneOrderResponse!]!
-}
-
-type OneUserResponse {
-  _id: ID!
-  firstName: String!
-  lastName: String!
 }
 
 type OneOrderResponse {
@@ -28,5 +28,9 @@ type OneOrderResponse {
 }
 
 type Query {
-  getAllOrders: AllOrdersResponse!
+  getAllOrders(paginate: PaginateInput): AllOrdersResponse!
+}
+
+input PaginateInput {
+  page: Int!
 }

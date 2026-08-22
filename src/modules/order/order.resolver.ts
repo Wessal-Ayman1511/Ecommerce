@@ -1,4 +1,4 @@
-import { Query, Resolver } from '@nestjs/graphql';
+import { Args, Query, Resolver } from '@nestjs/graphql';
 import { OrderService } from './order.service';
 import { AllOrdersResponse } from './entities/order.entity';
 import { Public, Roles } from 'src/common/decorators';
@@ -7,6 +7,7 @@ import { skipInterceptor } from 'src/common/decorators/skip-interceptor.decorato
 import { User } from 'src/common/decorators/user-graphql.decorator';
 import { Types } from 'mongoose';
 import { Role } from 'src/DB/enums/user.enum';
+import { PaginateInput } from 'src/common/graphql/inputs/paginate.input';
 
 @Resolver()
 export class OrderResolver {
@@ -17,9 +18,10 @@ export class OrderResolver {
   @skipInterceptor()
   @Query(() => AllOrdersResponse)
   async getAllOrders(
-    @User('_id') userId: Types.ObjectId
+    @User('_id') userId: Types.ObjectId,
+    @Args('paginate', {nullable: true}) paginate: PaginateInput
     
   ) {
-    return this._OrderService.AllOrders(userId);
+    return this._OrderService.AllOrders(userId, paginate);
   }
 }

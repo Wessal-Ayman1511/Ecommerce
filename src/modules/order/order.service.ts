@@ -12,6 +12,7 @@ import { OrderRepository } from 'src/DB/repositories';
 import { OrderStatus, PaymendMethod } from 'src/DB/enums/order.enum';
 import { PaymentService } from 'src/common/payment/payment.service';
 import { Types } from 'mongoose';
+import { PaginateInput } from 'src/common/graphql/inputs/paginate.input';
 
 @Injectable()
 export class OrderService {
@@ -190,10 +191,12 @@ export class OrderService {
     return `This action removes a #${id} order`;
   }
 
-  async AllOrders(userId: Types.ObjectId) {
+  async AllOrders(userId: Types.ObjectId, paginate: PaginateInput) {
     return await this._OrderRepository.findAll({
       filter: { user: userId },
       populate: [{ path: 'user' }],
+      paginate: paginate
+
     });
   }
 }

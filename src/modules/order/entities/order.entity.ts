@@ -1,17 +1,9 @@
 import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Types } from 'mongoose';
+import { PaginateRespone } from 'src/common/graphql/entities/paginate.entity';
 import { OrderStatus, PaymendMethod } from 'src/DB/enums/order.enum';
-@ObjectType()
-export class PaginateRespone {
-  @Field(() => Int)
-  totalSize: number;
-  @Field(() => Int)
-  totalPages: number;
-  @Field(() => Int)
-  pageSize: number;
-  @Field(() => Int)
-  pageNumber: number;
-}
+import { OneUserResponse } from 'src/modules/user/entities/user.entity';
+
 
 @ObjectType()
 export class AllOrdersResponse extends PaginateRespone {
@@ -19,17 +11,7 @@ export class AllOrdersResponse extends PaginateRespone {
   data: OneOrderResponse[];
 }
 
-@ObjectType()
-export class OneUserResponse {
-  @Field(() => ID)
-  _id: Types.ObjectId;
 
-  @Field(() => String)
-  firstName: string;
-
-  @Field(() => String)
-  lastName: string;
-}
 
 @ObjectType()
 export class OneOrderResponse {
