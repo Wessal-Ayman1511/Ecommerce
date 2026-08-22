@@ -16,6 +16,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ResponseMappingInterceptor } from './common/interceptors';
 
 @Module({
   imports: [
@@ -71,7 +73,12 @@ import { join } from 'path';
     OrderModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseMappingInterceptor
+    }
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
