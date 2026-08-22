@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY, ROLES_KEY } from '../decorators';
+import { IS_GRAPHQL } from '../decorators/graphql-decorator';
+import { GqlExecutionContext } from '@nestjs/graphql';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -17,12 +19,26 @@ export class RoleGuard implements CanActivate {
     ]);
     if (isPublic) return true;
 
+    const isGraphql = this.reflector.getAllAndOverride(IS_GRAPHQL, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    let req;
+
+    if (isGraphql) {
+      let cxt = GqlExecutionContext.create(context).getContext();
+      req = cxt.req;
+    } else {
+      req = context.switchToHttp().getRequest();
+    }
+
     const requiredRoles = this.reflector.getAllAndMerge(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    const { user } = context.switchToHttp().getRequest();
+    const { user } = req;
 
     if (requiredRoles?.length) {
       if (!requiredRoles.includes(user?.role))

@@ -11,6 +11,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { TokenRepository, UserRepository } from 'src/DB/repositories';
 import { IS_PUBLIC_KEY } from '../decorators';
+import { IS_GRAPHQL } from '../decorators/graphql-decorator';
+import { GqlExecutionContext } from '@nestjs/graphql';
 
 @Injectable()
 export class AuthenticationGaurd implements CanActivate {
@@ -28,8 +30,20 @@ export class AuthenticationGaurd implements CanActivate {
       context.getClass(),
     ]);
     if (isPublic) return true;
+    let req;
 
-    const req = context.switchToHttp().getRequest();
+    let isGraphQl = this.reflector.getAllAndOverride(IS_GRAPHQL, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isGraphQl) {
+      const cxt = GqlExecutionContext.create(context).getContext();
+      req = cxt.req;
+    } else {
+      req = context.switchToHttp().getRequest();
+    }
+
     const token = this.getTokenFromReq(req);
     if (!token) throw new UnauthorizedException('Token Required!');
 

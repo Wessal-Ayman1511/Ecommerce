@@ -189,4 +189,9 @@ export class OrderService {
   remove(id: number) {
     return `This action removes a #${id} order`;
   }
+
+  async AllOrders(){
+    return await this._OrderRepository.findAll({populate: [{path: 'user'}]})
+
+  }
 }

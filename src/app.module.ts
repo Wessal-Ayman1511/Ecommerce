@@ -11,10 +11,11 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { ProductModule } from './modules/product/product.module';
 import { CartModule } from './modules/cart/cart.module';
 import { OrderModule } from './modules/order/order.module';
-//import { CacheModule } from '@nestjs/cache-manager';
 import { CacheableMemory, createKeyv, Keyv } from 'cacheable';
 import { CacheModule } from '@nestjs/cache-manager';
-
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -55,8 +56,14 @@ import { CacheModule } from '@nestjs/cache-manager';
           ],
         };
       },
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
+    GraphQLModule.forRoot({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/modules/schema.gql'),
+      context: (req, res) => ({req, res})
+    }),
+    
     UserModule,
     CategoryModule,
     ProductModule,

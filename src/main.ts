@@ -16,7 +16,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  app.useGlobalInterceptors(new ResponseMappingInterceptor());
+  //app.useGlobalInterceptors(new ResponseMappingInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const configService = app.get(ConfigService);
