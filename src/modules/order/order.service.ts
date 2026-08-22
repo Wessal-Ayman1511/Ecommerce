@@ -190,8 +190,10 @@ export class OrderService {
     return `This action removes a #${id} order`;
   }
 
-  async AllOrders(){
-    return await this._OrderRepository.findAll({populate: [{path: 'user'}]})
-
+  async AllOrders(userId: Types.ObjectId) {
+    return await this._OrderRepository.findAll({
+      filter: { user: userId },
+      populate: [{ path: 'user' }],
+    });
   }
 }

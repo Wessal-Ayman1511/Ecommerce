@@ -63,7 +63,7 @@ import { ResponseMappingInterceptor } from './common/interceptors';
     GraphQLModule.forRoot({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/modules/schema.gql'),
-      context: (req, res) => ({req, res})
+      context: ({req, res}) => ({req, res})
     }),
     
     UserModule,

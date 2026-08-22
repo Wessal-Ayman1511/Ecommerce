@@ -1,19 +1,25 @@
 import { Query, Resolver } from '@nestjs/graphql';
 import { OrderService } from './order.service';
 import { AllOrdersResponse } from './entities/order.entity';
-import { Public } from 'src/common/decorators';
+import { Public, Roles } from 'src/common/decorators';
 import { isGraphQL } from 'src/common/decorators/graphql-decorator';
 import { skipInterceptor } from 'src/common/decorators/skip-interceptor.decorator';
+import { User } from 'src/common/decorators/user-graphql.decorator';
+import { Types } from 'mongoose';
+import { Role } from 'src/DB/enums/user.enum';
 
 @Resolver()
 export class OrderResolver {
   constructor(private readonly _OrderService: OrderService) {}
 
-  @Public()
+  @Roles(Role.USER)
   @isGraphQL()
   @skipInterceptor()
   @Query(() => AllOrdersResponse)
-  async getAllOrders() {
-    return this._OrderService.AllOrders();
+  async getAllOrders(
+    @User('_id') userId: Types.ObjectId
+    
+  ) {
+    return this._OrderService.AllOrders(userId);
   }
 }
